@@ -1,0 +1,52 @@
+@echo off
+echo 🚀 Starting Document Extraction System...
+echo.
+
+REM Check if .env exists
+if not exist "backend\.env" (
+    echo ⚠️  No .env file found!
+    echo Creating from template...
+    copy "backend\.env.example" "backend\.env"
+    echo.
+    echo 📝 Please edit backend\.env and add your API keys:
+    echo    - OPENAI_API_KEY (required)
+    echo    - NANONETS_API_KEY (optional)
+    echo.
+    pause
+)
+
+REM Start backend
+echo 🐍 Starting Python backend...
+cd backend
+if not exist "venv\" (
+    python -m venv venv
+)
+call venv\Scripts\activate
+pip install -r requirements.txt >nul 2>&1
+start /B python main.py
+cd ..
+
+REM Wait for backend
+echo ⏳ Waiting for backend to start...
+timeout /t 5 /nobreak >nul
+
+REM Start frontend
+echo 🌐 Starting Node.js frontend...
+cd frontend
+call npm install >nul 2>&1
+start /B npm start
+cd ..
+
+echo.
+echo ✅ System started!
+echo.
+echo 📱 Frontend: http://localhost:3000
+echo 🔧 Backend:  http://localhost:5000
+echo.
+echo Press any key to stop all services...
+pause >nul
+
+REM Cleanup
+taskkill /F /IM python.exe /T >nul 2>&1
+taskkill /F /IM node.exe /T >nul 2>&1
+echo 👋 Shutting down...
