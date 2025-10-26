@@ -1,46 +1,62 @@
-from crewai import Agent
-from tools import SchemaAnalyzerTool, DataExtractorTool
+import os
+from crewai import Agent, LLM
+from src.tools import SchemaAnalyzerTool # DataExtractorTool removed for V1
+from dotenv import load_dotenv
+load_dotenv()
+
+# Get API key from environment
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# --- LLM Setup ---
+# Initialize Gemini
+# Make sure GOOGLE_API_KEY is set in your .env file
+llm = LLM(
+    model="gemini/gemini-2.5-flash",
+    temperature=0,
+    api_key=GEMINI_API_KEY
+)
+# --- End LLM Setup ---
 
 def create_orchestrator_agent():
-    """Main coordination agent"""
+    """Main coordination agent, also acts as manager"""
     return Agent(
-        role='Extraction Orchestrator',
-        goal='Coordinate the extraction process by planning task execution and aggregating results',
+        role='Extraction Orchestrator & Manager', # Role updated
+        goal='Coordinate the extraction process for a list of user requests by delegating schema analysis and data extraction tasks, ensuring the overall process completes successfully.', # Goal updated
         backstory="""You are an experienced project manager specializing in document processing.
-        You excel at breaking down complex extraction requests into manageable steps,
-        coordinating between specialists, and ensuring all tasks are completed accurately.
-        You understand document structure and can prioritize extraction tasks effectively.""",
+        You receive a list of extraction tasks, each with an aim and schema.
+        For each task, you first delegate to the Schema Analyzer to get the prompt and Pydantic model string.
+        Then, you delegate to the Extraction Specialist using the generated prompt/model string and the document content.
+        You collect results for all tasks, manage the workflow, and provide a final aggregated list.""",
+        llm=llm,
         verbose=True,
-        allow_delegation=True,
-        max_iter=15
+        allow_delegation=True # Essential for managing and delegating
     )
 
 def create_schema_analyzer_agent():
     """Schema analysis and prompt engineering agent"""
     return Agent(
         role='Schema Analyzer & Prompt Engineer',
-        goal='Analyze extraction schemas and create optimal extraction prompts with Pydantic models',
-        backstory="""You are a technical architect with deep expertise in data modeling and prompt engineering.
-        You understand how to translate business requirements into precise extraction instructions.
-        You create clear, unambiguous prompts that guide extractors to find exactly the right information.
-        You're skilled at building Pydantic models that validate data structures effectively.""",
+        goal='Analyze a single extraction schema and create an optimal extraction prompt and a Pydantic model definition string.',
+        backstory="""You are a technical architect specializing in data modeling and prompt engineering.
+        You receive a task aim and schema fields and generate:
+        1. A clear, effective prompt for an LLM to extract data matching the schema.
+        2. A Python string defining a Pydantic model for validating the extracted data.""",
+        llm=llm,
         tools=[SchemaAnalyzerTool()],
         verbose=True,
-        allow_delegation=False,
-        max_iter=10
+        allow_delegation=False
     )
 
 def create_extraction_specialist_agent():
-    """Data extraction and validation agent"""
+    """Data extraction agent"""
     return Agent(
         role='Extraction Specialist',
-        goal='Extract structured data from documents accurately and validate against schemas',
-        backstory="""You are a meticulous data extraction expert with years of experience parsing documents.
-        You have a keen eye for detail and can identify relevant information even in complex layouts.
-        You understand various document formats and can extract data while maintaining accuracy.
-        You always validate your extractions against the provided schema and handle edge cases gracefully.""",
-        tools=[DataExtractorTool()],
+        goal='Extract structured data from document markdown based on a given prompt and Pydantic model definition string.',
+        backstory="""You are a meticulous data extraction expert. You follow instructions precisely.
+        You receive document content (markdown), an extraction prompt, and a Pydantic model definition string.
+        Your task is to extract the relevant information from the markdown according to the prompt
+        and return it as a JSON string that *should* conform to the Pydantic model definition.""",
+        llm=llm,
         verbose=True,
-        allow_delegation=False,
-        max_iter=10
+        allow_delegation=False
     )

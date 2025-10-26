@@ -1,4 +1,4 @@
-from crewai_tools import BaseTool
+from crewai.tools import BaseTool
 from typing import Type, List
 from pydantic import BaseModel, Field, create_model
 import json

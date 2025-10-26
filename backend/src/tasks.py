@@ -1,81 +1,56 @@
+# src/tasks.py
 from crewai import Task
+# from models import ExtractionTask # Not strictly needed here anymore
 import json
 
-def create_planning_task(agent, extraction_input):
-    """Create task for orchestrator to plan execution"""
-    return Task(
-        description=f"""Review the extraction request and plan the execution strategy.
-        
-        You have {len(extraction_input.tasks)} extraction task(s) to complete:
-        
-        {json.dumps([{"aim": t.aim, "fields": len(t.schema)} for t in extraction_input.tasks], indent=2)}
-        
-        Your responsibilities:
-        1. Review each extraction task aim and schema
-        2. Determine if tasks should be executed sequentially or if any can be parallelized
-        3. Identify any dependencies between tasks
-        4. Create an execution plan
-        5. Coordinate with Schema Analyzer to generate prompts
-        6. Coordinate with Extraction Specialist to perform extractions
-        7. Aggregate all results into a final structured output
-        
-        Start by delegating the first task to the Schema Analyzer.
-        """,
-        agent=agent,
-        expected_output="A complete extraction plan and coordination strategy"
-    )
+ # --- Main Task for Orchestrator ---
+def coordinate_extractions_task(agent): # Removed arguments that are now passed via kickoff inputs
+     """
+     The primary task for the Orchestrator/Manager agent.
+     Description uses CrewAI placeholders {} which are filled during kickoff.
+     """
+     # The description now uses {placeholders} that CrewAI will fill
+     # using the dictionary returned by @before_kickoff
+     return Task(
+         description="""**Overall Goal:** Manage and execute the extraction process for the user-defined task(s) listed below on the provided document markdown.
 
-def create_schema_analysis_task(agent, task_data, task_index):
-    """Create task for schema analyzer"""
-    schema_json = json.dumps([s.dict() for s in task_data.schema])
-    
-    return Task(
-        description=f"""Analyze the extraction schema and generate prompt + Pydantic model.
-        
-        TASK #{task_index}
-        AIM: {task_data.aim}
-        
-        SCHEMA FIELDS:
-        {schema_json}
-        
-        Your responsibilities:
-        1. Use the Schema Analyzer tool to generate:
-           - Extraction prompt with clear instructions
-           - Pydantic model for validation
-        2. Return the generated prompt and model
-        3. Ensure the prompt is clear and unambiguous
-        
-        Use the Schema Analyzer tool with:
-        - task_aim: "{task_data.aim}"
-        - schema_fields: '{schema_json}'
-        """,
-        agent=agent,
-        expected_output="Generated extraction prompt and Pydantic model definition"
-    )
+         **Document Markdown Length:** {markdown_length} characters (The full markdown content is available in context).
 
-def create_extraction_task(agent, markdown_content, prompt_and_model):
-    """Create task for extraction specialist"""
-    return Task(
-        description=f"""Extract structured data from the document using the provided prompt and schema.
-        
-        You have been given:
-        1. An extraction prompt with clear instructions
-        2. A Pydantic model for validation
-        3. The document content in markdown format
-        
-        Your responsibilities:
-        1. Carefully read the extraction prompt
-        2. Analyze the markdown document
-        3. Extract the requested information
-        4. Validate extracted data against the Pydantic model
-        5. Return data in valid JSON format
-        
-        IMPORTANT: Return ONLY the extracted JSON data, no additional text or explanation.
-        
-        Document content will be provided separately.
-        Extraction prompt and schema: {prompt_and_model}
-        """,
-        agent=agent,
-        expected_output="Structured JSON data matching the Pydantic schema",
-        context=[markdown_content] if markdown_content else None
-    )
+         **User Task Summary:**
+         ```json
+         {tasks_summary_json}
+         ```
+
+         **Full User Task List (Reference this list for each task's details):**
+         ```json
+         {tasks_full_json}
+         ```
+
+         **Your Management Workflow (Execute for EACH task sequentially from the Full User Task List above):**
+
+         **For the CURRENT task you are processing from the list:**
+         1.  Identify the task's **index** (starting from 1) and its **aim**.
+         2.  **Delegate Schema Analysis:**
+             * **Delegate To:** `Schema Analyzer & Prompt Engineer`
+             * **Action:** Instruct the delegate to analyze the 'aim' and 'extraction_schema' specific to **this current task** (retrieve these details from the Full User Task List based on the index/aim you identified). The delegate must return a JSON object containing 'extraction_prompt' and 'pydantic_model_string'.
+             * **Wait** for the JSON result. Store it as `analysis_result`. Handle errors if the delegate fails.
+
+         3.  **Delegate Data Extraction:**
+             * **Delegate To:** `Extraction Specialist`
+             * **Action:** Instruct the delegate to extract data from the **full document markdown** (available in context) using the `analysis_result['extraction_prompt']`. Also provide `analysis_result['pydantic_model_string']` for structural reference in the instructions. The delegate must return ONLY the extracted data as a valid JSON string.
+             * **Wait** for the JSON string result. Store it as `extracted_json`. Handle errors if the delegate fails.
+
+         4.  **Record Result:** Prepare a result dictionary for the current task containing the original task 'aim' (retrieved from the Full User Task List) and the `extracted_json`. If Step 2 or 3 failed, put an informative error message string in place of `extracted_json`.
+
+         **Final Output Requirement:**
+         After processing ALL tasks from the Full User Task List, compile and return ONLY a Python list containing the result dictionaries created in Step 4 for each task. Do NOT include any other text, explanations, or summaries.
+         """,
+         agent=agent,
+         expected_output="""A Python list of dictionaries, one for each input task, like:
+         [
+           { "task_aim": "Extract invoice details", "raw_extracted_json": "{\\"invoice_id\\": \\"123\\", \\"total_amount\\": 99.5}" },
+           { "task_aim": "Find contact person", "raw_extracted_json": "Error: Schema analysis failed." },
+           { "task_aim": "List all products mentioned", "raw_extracted_json": "[{\\"product_name\\": \\"Widget A\\"}]" }
+         ]
+         """
+     )
