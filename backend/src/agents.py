@@ -60,3 +60,21 @@ def create_extraction_specialist_agent():
         verbose=True,
         allow_delegation=False
     )
+
+def create_validation_agent():
+    """JSON validation and formatting agent"""
+    return Agent(
+        role='JSON Validation & Formatting Specialist',
+        goal='Validate and format extracted JSON data to ensure it meets the required schema and is properly structured.',
+        backstory="""You are a data quality specialist with expertise in JSON validation and formatting.
+        You receive raw extracted data (which may be malformed JSON, plain text, or other formats)
+        and a target schema. Your job is to:
+        1. Parse and validate the input data
+        2. Ensure it conforms to the expected JSON structure
+        3. Fix any formatting issues
+        4. Return clean, valid JSON that matches the schema requirements
+        5. Handle errors gracefully and provide meaningful error messages when data cannot be extracted.""",
+        llm=llm,
+        verbose=True,
+        allow_delegation=False
+    )

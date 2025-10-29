@@ -227,6 +227,9 @@
                     <button class="remove-btn" onclick="removeTask('${taskId}')">Remove</button>
                 </div>
                 <input type="text" placeholder="Task Aim (e.g., Extract invoice items)" class="task-aim">
+                <label class="checkbox-label" style="margin: 8px 0 12px 0;">
+                    <input type="checkbox" class="task-multirow"> Multi-row result for this task
+                </label>
                 <div class="schema-container">
                     <h4 style="margin: 15px 0 10px 0; color: #667eea;">Output Schema:</h4>
                     <div class="schema-fields-container"></div>
@@ -256,9 +259,6 @@
                 <label class="checkbox-label">
                     <input type="checkbox" class="field-mandatory"> Mandatory
                 </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" class="field-multirow"> Multi-row
-                </label>
             `;
             container.appendChild(fieldDiv);
         }
@@ -278,6 +278,7 @@
             const tasks = [];
             document.querySelectorAll('.task-card').forEach(card => {
                 const aim = card.querySelector('.task-aim').value;
+                const isMultiRow = card.querySelector('.task-multirow')?.checked || false;
                 const schema = [];
                 card.querySelectorAll('.schema-fields').forEach(field => {
                     const name = field.querySelector('.field-name').value;
@@ -286,13 +287,12 @@
                             name: name,
                             type: field.querySelector('.field-type').value,
                             description: field.querySelector('.field-desc').value,
-                            mandatory: field.querySelector('.field-mandatory').checked,
-                            multi_row: field.querySelector('.field-multirow').checked
+                            mandatory: field.querySelector('.field-mandatory').checked
                         });
                     }
                 });
                 if (aim && schema.length > 0) {
-                    tasks.push({ aim, schema });
+                    tasks.push({ aim, schema, multi_row: isMultiRow });
                 }
             });
             return tasks;

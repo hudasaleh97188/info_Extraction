@@ -1,9 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from crew import ExtractionCrew
 from dotenv import load_dotenv
 import os
 import traceback
+
+# Import the crew implementation from src
+try:
+    from src.crew import ExtractionCrew
+except Exception as import_error:
+    # Fallback: adjust path if running directly without package context
+    import sys
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    src_dir = os.path.join(current_dir, 'src')
+    if src_dir not in sys.path:
+        sys.path.append(src_dir)
+    from crew import ExtractionCrew  # type: ignore
 
 # Load environment variables
 load_dotenv()
@@ -40,14 +51,25 @@ def extract():
         # Initialize and run extraction crew
         crew = ExtractionCrew()
         
+        # Normalize UI tasks: map `schema` -> `extraction_schema` expected by backend crew
+        normalized_tasks = []
+        for t in tasks:
+            if isinstance(t, dict):
+                task_copy = dict(t)
+                if 'extraction_schema' not in task_copy and 'schema' in task_copy:
+                    task_copy['extraction_schema'] = task_copy.get('schema')
+                normalized_tasks.append(task_copy)
+            else:
+                normalized_tasks.append(t)
+        
         inputs = {
             'file_data': file_data,
             'file_name': file_name,
             'file_type': file_type,
-            'tasks': tasks
+            'tasks': normalized_tasks
         }
         
-        result = crew.extract(inputs)
+        result = crew.run(inputs)
         
         return jsonify(result), 200
         
