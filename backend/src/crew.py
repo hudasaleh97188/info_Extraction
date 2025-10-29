@@ -18,7 +18,7 @@ from src.agents import create_orchestrator_agent, create_schema_analyzer_agent, 
 from src.tasks import coordinate_extractions_task
 
 # --- MOCK OCR FLAG ---
-USE_MOCK_OCR = False # Set to True to force mock markdown
+USE_MOCK_OCR = True # Set to True to force mock markdown
 # ---------------------
 
 @CrewBase
@@ -342,12 +342,29 @@ class ExtractionCrew:
                     print(final_result)
             print("="*50 + "\n")
 
-            return {
-                "status": "success",
-                "markdown_length": len(self.markdown_content),
-                "tasks_processed": len(self.user_tasks_input),
-                "results": final_result # This should be the list from Orchestrator
-            }
+            normalized_results = self._normalize_crew_output(final_result)
+
+            # Validate and coerce into Pydantic models for stable JSON
+            from src.models import TaskResult, FinalExtractionOutput
+            task_results: List[TaskResult] = []
+            if isinstance(normalized_results, list):
+                for item in normalized_results:
+                    if isinstance(item, dict):
+                        task_results.append(TaskResult(
+                            task_aim=item.get("task_aim", ""),
+                            extracted_data=item.get("extracted_data"),
+                            raw_extracted_json=item.get("raw_extracted_json"),
+                            error=item.get("error")
+                        ))
+
+            final_output = FinalExtractionOutput(
+                status="success",
+                markdown_length=len(self.markdown_content),
+                tasks_processed=len(self.user_tasks_input),
+                results=task_results
+            )
+
+            return final_output.model_dump()
 
         except Exception as e:
             print(f"❌ Extraction crew failed during run: {str(e)}")
@@ -357,6 +374,80 @@ class ExtractionCrew:
                 "status": "error",
                 "error": str(e)
             }
+
+    def _normalize_crew_output(self, final_result: Any) -> Any:
+        """Convert CrewAI CrewOutput or other rich objects into plain Python types.
+        Also attempts to parse stringified JSON (including fenced code blocks).
+        """
+        try:
+            # If it's already plain JSON-friendly
+            if isinstance(final_result, (list, dict)) or final_result is None:
+                return final_result
+
+            # Common CrewOutput attributes
+            for attr in ("output", "raw", "result", "results", "final_output"):
+                value = getattr(final_result, attr, None)
+                if isinstance(value, (list, dict)):
+                    return value
+                if isinstance(value, str):
+                    parsed = self._try_parse_json_like_string(value)
+                    if parsed is not None:
+                        return parsed
+
+            # If it's a string, try to parse it as JSON or Python literal
+            if isinstance(final_result, str):
+                parsed = self._try_parse_json_like_string(final_result)
+                if parsed is not None:
+                    return parsed
+
+            # to_dict method
+            to_dict = getattr(final_result, "to_dict", None)
+            if callable(to_dict):
+                maybe = to_dict()
+                if isinstance(maybe, (list, dict)):
+                    return maybe
+                if isinstance(maybe, str):
+                    parsed = self._try_parse_json_like_string(maybe)
+                    if parsed is not None:
+                        return parsed
+
+            # Fallback to string (last resort)
+            return str(final_result)
+        except Exception:
+            return str(final_result)
+
+    def _try_parse_json_like_string(self, s: str) -> Any:
+        """Try several strategies to parse a string that might contain JSON/list data."""
+        try:
+            import re, ast
+            text = s.strip()
+            # Strip markdown fences ```json ... ``` or ``` ... ```
+            if text.startswith("```"):
+                text = re.sub(r"^```[a-zA-Z]*\n?|```$", "", text).strip()
+            # If it's a bare JSON array/dict
+            try:
+                return json.loads(text)
+            except Exception:
+                pass
+            # Try to find a JSON array inside the text
+            m = re.search(r"\[.*\]", text, re.DOTALL)
+            if m:
+                candidate = m.group(0)
+                try:
+                    return json.loads(candidate)
+                except Exception:
+                    # Last resort: Python literal eval (handles single quotes)
+                    try:
+                        return ast.literal_eval(candidate)
+                    except Exception:
+                        pass
+            # Try full literal eval as last attempt
+            try:
+                return ast.literal_eval(text)
+            except Exception:
+                return None
+        except Exception:
+            return None
 
 # --- Mock Input Data & Example Usage ---
 def get_mock_inputs() -> Dict[str, Any]:
