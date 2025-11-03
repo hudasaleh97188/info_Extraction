@@ -7,3 +7,5 @@ requests==2.31.0
 pydantic==2.5.0
 python-multipart==0.0.6
 Pillow==10.2.0
+pdf2image==1.16.3
+mistralai>=1.0.0

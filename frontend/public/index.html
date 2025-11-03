@@ -198,7 +198,8 @@
         <!-- Results -->
         <div class="results-section" id="results">
             <h2 style="color: #667eea; margin-bottom: 20px;">✅ Extraction Results</h2>
-            <pre id="resultsContent"></pre>
+            <div id="resultsTables"></div>
+            <pre id="resultsContent" style="margin-top: 16px;"></pre>
         </div>
     </div>
 
@@ -322,6 +323,7 @@
                 const result = await response.json();
 
                 if (response.ok) {
+                    renderResults(result);
                     document.getElementById('resultsContent').textContent = JSON.stringify(result, null, 2);
                     document.getElementById('results').classList.add('show');
                 } else {
@@ -333,6 +335,94 @@
                 document.getElementById('loading').classList.remove('show');
                 document.getElementById('extractBtn').disabled = false;
             }
+        }
+
+        function renderResults(apiResult) {
+            const container = document.getElementById('resultsTables');
+            container.innerHTML = '';
+
+            const results = (apiResult && Array.isArray(apiResult.results)) ? apiResult.results : [];
+            if (results.length === 0) {
+                container.innerHTML = '<p>No results to display.</p>';
+                return;
+            }
+
+            results.forEach((task, idx) => {
+                const section = document.createElement('div');
+                section.style.marginBottom = '20px';
+
+                const title = document.createElement('h3');
+                title.textContent = task.task_aim || `Task ${idx + 1}`;
+                title.style.color = '#667eea';
+                title.style.margin = '10px 0';
+                section.appendChild(title);
+
+                const data = task.extracted_data;
+                let rows = [];
+                if (Array.isArray(data)) {
+                    rows = data;
+                } else if (data && Array.isArray(data.entries)) {
+                    rows = data.entries;
+                } else if (data && typeof data === 'object') {
+                    rows = [data];
+                }
+
+                if (!rows || rows.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.textContent = 'No extracted data.';
+                    section.appendChild(empty);
+                    container.appendChild(section);
+                    return;
+                }
+
+                // Collect columns across all rows
+                const columns = Array.from(rows.reduce((set, r) => {
+                    if (r && typeof r === 'object') {
+                        Object.keys(r).forEach(k => set.add(k));
+                    }
+                    return set;
+                }, new Set())).sort();
+
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.background = '#fff';
+                table.style.border = '1px solid #e1e8ed';
+                table.style.borderRadius = '8px';
+                table.style.overflow = 'hidden';
+
+                const thead = document.createElement('thead');
+                const headRow = document.createElement('tr');
+                columns.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = col;
+                    th.style.textAlign = 'left';
+                    th.style.padding = '10px';
+                    th.style.background = '#f8f9ff';
+                    th.style.borderBottom = '1px solid #e1e8ed';
+                    headRow.appendChild(th);
+                });
+                thead.appendChild(headRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    columns.forEach(col => {
+                        const td = document.createElement('td');
+                        const v = (r && typeof r === 'object') ? r[col] : undefined;
+                        td.textContent = v === undefined || v === null ? '' : String(v);
+                        td.style.padding = '10px';
+                        td.style.borderBottom = '1px solid #f0f2f5';
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+
+                section.appendChild(table);
+                container.appendChild(section);
+            });
         }
 
         // Add one task by default on load

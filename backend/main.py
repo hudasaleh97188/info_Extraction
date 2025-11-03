@@ -3,18 +3,18 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import traceback
+import sys
 
-# Import the crew implementation from src
+# Switch to LangGraph workflow
 try:
-    from src.crew import ExtractionCrew
-except Exception as import_error:
-    # Fallback: adjust path if running directly without package context
-    import sys
+    from src.lg_workflow import create_extraction_graph
+except Exception:
+    # Fallback path adjust
     current_dir = os.path.dirname(os.path.abspath(__file__))
     src_dir = os.path.join(current_dir, 'src')
     if src_dir not in sys.path:
         sys.path.append(src_dir)
-    from crew import ExtractionCrew  # type: ignore
+    from lg_workflow import create_extraction_graph  # type: ignore
 
 # Load environment variables
 load_dotenv()
@@ -48,10 +48,7 @@ def extract():
         print(f"📄 Processing file: {file_name}")
         print(f"📋 Tasks: {len(tasks)}")
         
-        # Initialize and run extraction crew
-        crew = ExtractionCrew()
-        
-        # Normalize UI tasks: map `schema` -> `extraction_schema` expected by backend crew
+        # Normalize UI tasks: map `schema` -> `extraction_schema` expected by backend
         normalized_tasks = []
         for t in tasks:
             if isinstance(t, dict):
@@ -62,16 +59,31 @@ def extract():
             else:
                 normalized_tasks.append(t)
         
-        inputs = {
-            'file_data': file_data,
-            'file_name': file_name,
-            'file_type': file_type,
-            'tasks': normalized_tasks
+        # Build graph input
+        graph_input = {
+            "original_input": {
+                'file_data': file_data,
+                'file_name': file_name,
+                'file_type': file_type,
+                'tasks': normalized_tasks
+            }
         }
-        
-        result = crew.run(inputs)
-        
-        return jsonify(result), 200
+
+        # Compile and run LangGraph once per request (can be optimized if needed)
+        app_graph = create_extraction_graph()
+        final_state = app_graph.invoke(graph_input)
+
+        final_output = final_state.get("final_output")
+        if final_output is None:
+            # Fallback: return entire state for debugging
+            return jsonify({
+                "status": "error",
+                "error": "Graph finished without final_output",
+                "state": final_state
+            }), 500
+
+        # final_output is Pydantic; return JSON
+        return jsonify(final_output.model_dump()), 200
         
     except Exception as e:
         print(f"❌ Error: {str(e)}")
@@ -91,12 +103,6 @@ def health():
     }), 200
 
 if __name__ == '__main__':
-    print("🚀 Starting Extraction Backend...")
-    print(f"📡 Nanonets API: {'Configured' if os.getenv('NANONETS_API_KEY') else 'Not configured (using mock)'}")
-    print(f"🔑 OpenAI API: {'Configured' if os.getenv('OPENAI_API_KEY') else 'NOT CONFIGURED - REQUIRED!'}")
-    
-    if not os.getenv('OPENAI_API_KEY'):
-        print("\n⚠️  WARNING: OPENAI_API_KEY not found in environment!")
-        print("   Set it in .env file or export OPENAI_API_KEY=your_key\n")
+    print("🚀 Starting Extraction Backend (LangGraph)...")
     
     app.run(host='0.0.0.0', port=5000, debug=True)
