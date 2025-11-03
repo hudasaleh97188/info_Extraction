@@ -121,6 +121,23 @@
             background: #ccc;
             cursor: not-allowed;
         }
+        .download-btn {
+            background: #10ac84;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        .download-btn:hover { background: #0e9770; }
+        .task-title-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
         .results-section {
             margin-top: 30px;
             padding: 20px;
@@ -152,13 +169,6 @@
             color: #667eea;
             font-weight: bold;
             margin-top: 10px;
-        }
-        pre {
-            background: #2d3748;
-            color: #68d391;
-            padding: 20px;
-            border-radius: 10px;
-            overflow-x: auto;
         }
     </style>
 </head>
@@ -199,7 +209,6 @@
         <div class="results-section" id="results">
             <h2 style="color: #667eea; margin-bottom: 20px;">✅ Extraction Results</h2>
             <div id="resultsTables"></div>
-            <pre id="resultsContent" style="margin-top: 16px;"></pre>
         </div>
     </div>
 
@@ -238,7 +247,7 @@
                 </div>
             `;
             document.getElementById('tasksList').appendChild(taskCard);
-            addSchemaField(taskId); // Add one field by default
+            addSchemaField(taskId);
             updateExtractButton();
         }
 
@@ -324,7 +333,6 @@
 
                 if (response.ok) {
                     renderResults(result);
-                    document.getElementById('resultsContent').textContent = JSON.stringify(result, null, 2);
                     document.getElementById('results').classList.add('show');
                 } else {
                     alert('Extraction failed: ' + (result.error || 'Unknown error'));
@@ -351,11 +359,22 @@
                 const section = document.createElement('div');
                 section.style.marginBottom = '20px';
 
+                const titleHeader = document.createElement('div');
+                titleHeader.className = 'task-title-header';
+
                 const title = document.createElement('h3');
                 title.textContent = task.task_aim || `Task ${idx + 1}`;
                 title.style.color = '#667eea';
-                title.style.margin = '10px 0';
-                section.appendChild(title);
+                title.style.margin = '0';
+                titleHeader.appendChild(title);
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.textContent = '📥 Download Excel';
+                downloadBtn.onclick = () => downloadExcel(task, idx);
+                titleHeader.appendChild(downloadBtn);
+
+                section.appendChild(titleHeader);
 
                 const data = task.extracted_data;
                 let rows = [];
@@ -375,7 +394,6 @@
                     return;
                 }
 
-                // Collect columns across all rows
                 const columns = Array.from(rows.reduce((set, r) => {
                     if (r && typeof r === 'object') {
                         Object.keys(r).forEach(k => set.add(k));
@@ -425,7 +443,53 @@
             });
         }
 
-        // Add one task by default on load
+        function downloadExcel(task, idx) {
+            const data = task.extracted_data;
+            let rows = [];
+            if (Array.isArray(data)) {
+                rows = data;
+            } else if (data && Array.isArray(data.entries)) {
+                rows = data.entries;
+            } else if (data && typeof data === 'object') {
+                rows = [data];
+            }
+
+            if (!rows || rows.length === 0) {
+                alert('No data to download');
+                return;
+            }
+
+            const columns = Array.from(rows.reduce((set, r) => {
+                if (r && typeof r === 'object') {
+                    Object.keys(r).forEach(k => set.add(k));
+                }
+                return set;
+            }, new Set())).sort();
+
+            let csv = columns.join(',') + '\n';
+            rows.forEach(r => {
+                const values = columns.map(col => {
+                    const v = (r && typeof r === 'object') ? r[col] : '';
+                    const str = v === undefined || v === null ? '' : String(v);
+                    return str.includes(',') || str.includes('"') || str.includes('\n') 
+                        ? `"${str.replace(/"/g, '""')}"` 
+                        : str;
+                });
+                csv += values.join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const filename = `${(task.task_aim || `Task_${idx + 1}`).replace(/[^a-z0-9]/gi, '_')}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         window.onload = () => addTask();
     </script>
 </body>

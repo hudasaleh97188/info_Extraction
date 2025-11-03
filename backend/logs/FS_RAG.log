@@ -1,0 +1,8 @@
+2025-11-03 13:23:43 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
+2025-11-03 13:23:47 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
+2025-11-03 13:25:50 | INFO     | src.utils.logging_config:wrapper:67 - Starting execution: perform_mistral_ocr
+2025-11-03 13:25:50 | INFO     | src.lg_helpers:perform_mistral_ocr:69 - Starting Mistral OCR for file: BankStatementChequing.png (type: image/png)
+2025-11-03 13:25:50 | INFO     | src.lg_helpers:perform_mistral_ocr:94 - Processing single image file
+2025-11-03 13:25:50 | INFO     | src.lg_helpers:perform_mistral_ocr:99 - Performing OCR on page/image 1/1
+2025-11-03 13:25:50 | ERROR    | src.lg_helpers:perform_mistral_ocr:127 - Mistral OCR failed: Could not find discriminator field role in Ellipsis
+2025-11-03 13:25:50 | ERROR    | src.utils.logging_config:wrapper:76 - Failed perform_mistral_ocr after 0.05 seconds: Could not find discriminator field role in Ellipsis
