@@ -1,0 +1,16 @@
+pytest
+pytest-cov
+pytest-asyncio
+pytest-xdist
+requests
+pytest-mock
+python-dotenv
+langchain-google-genai
+langgraph
+langchain
+pydantic
+uv
+mistralai
+pdf2image
+Pillow
+loguru

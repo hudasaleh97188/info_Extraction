@@ -39,10 +39,6 @@ llm = ChatGoogleGenerativeAI(
     generation_config={"response_mime_type": "application/json"},
 )
 
-# --- MOCK OCR FLAG ---
-USE_MOCK_OCR = False # Set to True to use mock markdown for testing
-# ---------------------
-
 # --- State Definition ---
 
 class ExtractionGraphState(TypedDict):
@@ -75,7 +71,7 @@ def prepare_document_node(state: ExtractionGraphState) -> Dict[str, Any]:
     """
     Node to prepare the document:
     1. Validates input tasks.
-    2. Performs OCR (real or mock) to get markdown.
+    2. Performs OCR to get markdown.
     """
     print("--- (Node) prepare_document ---")
     inputs = state['original_input']
@@ -93,16 +89,12 @@ def prepare_document_node(state: ExtractionGraphState) -> Dict[str, Any]:
         print(f"✅ Validated {len(tasks_to_process)} tasks.")
 
         # 2. Perform OCR
-        if USE_MOCK_OCR:
-            print(" MOCKING OCR: Using predefined markdown content.")
-            markdown_content = get_mock_markdown()
-        else:
-            print(" ATTEMPTING REAL OCR (Mistral)...")
-            markdown_content = perform_mistral_ocr(
-                inputs.get('file_data'),
-                inputs.get('file_name'),
-                inputs.get('file_type')
-            )
+        print(" ATTEMPTING OCR (Mistral)...")
+        markdown_content = perform_mistral_ocr(
+            inputs.get('file_data'),
+            inputs.get('file_name'),
+            inputs.get('file_type')
+        )
         
         print(f"📄 Document Ready (Markdown Length: {len(markdown_content)} chars).")
         
