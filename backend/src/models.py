@@ -35,10 +35,3 @@ class FinalExtractionOutput(BaseModel):
      tasks_processed: Optional[int] = None
      results: Optional[List[TaskResult]] = None
      error: Optional[str] = None
-
-class FinalExtractionOutput(BaseModel):
-        status: str
-        markdown_length: Optional[int] = None
-        tasks_processed: Optional[int] = None
-        results: Optional[List[TaskResult]] = None
-        error: Optional[str] = None

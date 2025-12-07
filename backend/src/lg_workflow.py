@@ -1,19 +1,11 @@
 import os
 import json
 from typing import List, Dict, Any, Optional, TypedDict
-
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-
-# LangGraph and LangChain imports
 from langgraph.graph import StateGraph, END, MessagesState
 from langchain_google_genai import ChatGoogleGenerativeAI
-
-# Import Pydantic models from your models.py
-
 from src.models import TaskResult, FinalExtractionOutput, ExtractionTask
-
-# Import prompts
 from src.prompts_lg import get_extraction_prompt, get_validation_prompt
 
 # Import helpers
@@ -23,6 +15,7 @@ from src.lg_helpers import (
     SchemaAnalyzer,
     try_parse_json_like_string
 )
+from src.utils.logging_config import default_logger
 
 # --- Load Environment & LLM ---
 load_dotenv()
@@ -73,7 +66,7 @@ def prepare_document_node(state: ExtractionGraphState) -> Dict[str, Any]:
     1. Validates input tasks.
     2. Performs OCR to get markdown.
     """
-    print("--- (Node) prepare_document ---")
+    default_logger.info("--- (Node) prepare_document ---")
     inputs = state['original_input']
     markdown_content = ""
     tasks_to_process = []
@@ -86,17 +79,17 @@ def prepare_document_node(state: ExtractionGraphState) -> Dict[str, Any]:
         
         valid_tasks = [ExtractionTask(**task) for task in tasks_data]
         tasks_to_process = [task.model_dump() for task in valid_tasks]
-        print(f"✅ Validated {len(tasks_to_process)} tasks.")
+        default_logger.info(f"✅ Validated {len(tasks_to_process)} tasks.")
 
         # 2. Perform OCR
-        print(" ATTEMPTING OCR (Mistral)...")
+        default_logger.info(" ATTEMPTING OCR (Mistral)...")
         markdown_content = perform_mistral_ocr(
             inputs.get('file_data'),
             inputs.get('file_name'),
             inputs.get('file_type')
         )
         
-        print(f"📄 Document Ready (Markdown Length: {len(markdown_content)} chars).")
+        default_logger.info(f"📄 Document Ready (Markdown Length: {len(markdown_content)} chars).")
         
         return {
             "markdown_content": markdown_content,
@@ -105,7 +98,7 @@ def prepare_document_node(state: ExtractionGraphState) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        print(f"❌ Failed during document preparation: {str(e)}")
+        default_logger.info(f"❌ Failed during document preparation: {str(e)}")
         return {
             "final_output": FinalExtractionOutput(
                 status="error",
@@ -120,15 +113,15 @@ def task_dispatcher_node(state: ExtractionGraphState) -> Dict[str, Any]:
     2. If yes, pops the next task and puts it in `current_task`.
     3. If no, sets `current_task` to None.
     """
-    print("--- (Node) task_dispatcher ---")
+    default_logger.info("--- (Node) task_dispatcher ---")
     tasks_list = state.get("tasks_to_process", [])
     
     if not tasks_list:
-        print("✅ All tasks processed.")
+        default_logger.info("✅ All tasks processed.")
         return {"current_task": None}
         
     current_task = tasks_list.pop(0) # Get the next task
-    print(f"🔹 Dispatching task: {current_task.get('aim')}")
+    default_logger.info(f"🔹 Dispatching task: {current_task.get('aim')}")
     
     return {
         "tasks_to_process": tasks_list,
@@ -141,7 +134,7 @@ def analyze_schema_node(state: ExtractionGraphState) -> Dict[str, Any]:
     """
     Node to analyze the schema for the current task.
     """
-    print("--- (Node) analyze_schema ---")
+    default_logger.info("--- (Node) analyze_schema ---")
     task = state.get("current_task")
     if not task:
         return {"error": "analyze_schema_node: No current task found."}
@@ -157,11 +150,11 @@ def analyze_schema_node(state: ExtractionGraphState) -> Dict[str, Any]:
         if "error" in analysis_result:
             raise ValueError(analysis_result["error"])
             
-        print("✅ Schema analysis complete.")
+        default_logger.info("✅ Schema analysis complete.")
         return {"current_analysis_result": analysis_result}
 
     except Exception as e:
-        print(f"❌ Schema analysis failed: {e}")
+        default_logger.info(f"❌ Schema analysis failed: {e}")
         error_result = TaskResult(
             task_aim=task['aim'],
             extracted_data=None,
@@ -177,7 +170,7 @@ def extract_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
     """
     Node to perform the actual data extraction using the LLM.
     """
-    print("--- (Node) extract_data ---")
+    default_logger.info("--- (Node) extract_data ---")
     task = state.get("current_task")
     analysis_result = state.get("current_analysis_result")
     markdown = state.get("markdown_content")
@@ -188,12 +181,12 @@ def extract_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
 
     try:
         prompt_message = get_extraction_prompt(markdown, analysis_result)
-        print("... Sending extraction prompt to LLM...")
+        default_logger.info("... Sending extraction prompt to LLM...")
 
         llm_response = llm.invoke([prompt_message])
         raw_json_output = llm_response.content
         
-        print("✅ LLM returned raw extraction.")
+        default_logger.info("✅ LLM returned raw extraction.")
         
         return {
             "current_raw_json": raw_json_output,
@@ -201,7 +194,7 @@ def extract_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        print(f"❌ LLM extraction call failed: {e}")
+        default_logger.info(f"❌ LLM extraction call failed: {e}")
         error_result = TaskResult(
             task_aim=task['aim'],
             extracted_data=None,
@@ -217,7 +210,7 @@ def validate_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
     """
     Node to validate and clean the raw JSON from the extractor.
     """
-    print("--- (Node) validate_data ---")
+    default_logger.info("--- (Node) validate_data ---")
     task = state.get("current_task")
     raw_json = state.get("current_raw_json")
     analysis_result = state.get("current_analysis_result")
@@ -230,12 +223,12 @@ def validate_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
     
     try:
         prompt_message = get_validation_prompt(raw_json, analysis_result)
-        print("... Sending validation prompt to LLM...")
+        default_logger.info("... Sending validation prompt to LLM...")
 
         llm_response = llm.invoke([prompt_message])
         validated_json_string = llm_response.content
         
-        print("✅ LLM returned cleaned JSON string.")
+        default_logger.info("✅ LLM returned cleaned JSON string.")
 
         parsed_data = try_parse_json_like_string(validated_json_string)
         
@@ -246,7 +239,7 @@ def validate_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
         )
         
         completed_results = state.get("completed_results", []) + [new_result]
-        print(f"✅ Task '{task_aim}' complete.")
+        default_logger.info(f"✅ Task '{task_aim}' complete.")
         
         return {
             "completed_results": completed_results,
@@ -254,7 +247,7 @@ def validate_data_node(state: ExtractionGraphState) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        print(f"❌ LLM validation call failed: {e}")
+        default_logger.info(f"❌ LLM validation call failed: {e}")
         error_result = TaskResult(
             task_aim=task_aim,
             raw_extracted_json=raw_json,
@@ -269,7 +262,7 @@ def finalize_graph_node(state: ExtractionGraphState) -> Dict[str, Any]:
     """
     Node to assemble the final output object.
     """
-    print("--- (Node) finalize_graph ---")
+    default_logger.info("--- (Node) finalize_graph ---")
     
     final_output = FinalExtractionOutput(
         status="success",
@@ -278,7 +271,7 @@ def finalize_graph_node(state: ExtractionGraphState) -> Dict[str, Any]:
         results=state.get("completed_results", [])
     )
     
-    print("✅ Graph run complete.")
+    default_logger.info("✅ Graph run complete.")
     return {"final_output": final_output}
 
 
@@ -323,7 +316,6 @@ def create_extraction_graph() -> StateGraph:
     workflow.add_edge("analyze_schema", "extract_data")
     workflow.add_edge("extract_data", "validate_data")
     workflow.add_edge("validate_data", "task_dispatcher") # Loop back
-
     workflow.add_edge("finalize_graph", END)
     
     return workflow.compile()

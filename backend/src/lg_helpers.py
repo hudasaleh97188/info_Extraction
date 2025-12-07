@@ -13,6 +13,7 @@ from mistralai import Mistral
 
 # Import Pydantic models from your models.py
 from src.models import ExtractionTask
+from src.utils.logging_config import default_logger
 
 
 # Load environment variables
@@ -67,7 +68,7 @@ def perform_mistral_ocr(file_data: str, file_name: str, file_type: str) -> str:
     - Sends vision prompt asking for clean Markdown
     - Returns Markdown string
     """
-    print(f"Attempting Mistral OCR for {file_name} via chat.complete...")
+    default_logger.info(f"Attempting Mistral OCR for {file_name} via chat.complete...")
     if _mistral_client is None:
         raise ValueError("MISTRAL_API_KEY is not set. Please add it to your .env file.")
 
@@ -130,7 +131,7 @@ def perform_mistral_ocr(file_data: str, file_name: str, file_type: str) -> str:
 
         md_header = f"# OCR Output for {file_name} (Mistral)\n\n"
         final_md = md_header + "\n\n---\n\n".join(markdown_parts)
-        print("✅ Mistral OCR successful.")
+        default_logger.info("✅ Mistral OCR successful.")
         return final_md
     finally:
         # Cleanup temp files
@@ -181,7 +182,7 @@ def _extract_text_from_mistral_response(data: Dict[str, Any]) -> str:
                 if texts:
                     return "\n\n".join(texts)
     except Exception as e:
-        print(f"Error parsing Mistral response: {e}")
+        default_logger.info(f"Error parsing Mistral response: {e}")
         pass
     return ""
 
@@ -270,7 +271,7 @@ class SchemaAnalyzer:
             return result
             
         except Exception as e:
-            print(f"[Error] Schema analysis failed: {e}")
+            default_logger.info(f"[Error] Schema analysis failed: {e}")
             import traceback; traceback.print_exc();
             return {"error": f"Schema analysis failed: {str(e)}"}
 

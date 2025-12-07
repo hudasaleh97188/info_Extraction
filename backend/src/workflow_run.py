@@ -2,6 +2,7 @@ import json
 from src.lg_workflow import create_extraction_graph
 from src.models import FinalExtractionOutput # Import pydantic models
 from typing import Dict, Any
+from src.utils.logging_config import default_logger
 def get_mock_inputs() -> Dict[str, Any]:
     """
     Generates sample input data matching frontend structure.
@@ -45,13 +46,13 @@ def get_mock_inputs() -> Dict[str, Any]:
     }
 
 if __name__ == "__main__":
-    print("🚀 Compiling LangGraph extraction workflow...")
+    default_logger.info("🚀 Compiling LangGraph extraction workflow...")
     
     # 1. Compile the graph
     app = create_extraction_graph()
 
-    print("✅ Graph compiled.")
-    print("--- Starting workflow run ---")
+    default_logger.info("✅ Graph compiled.")
+    default_logger.info("--- Starting workflow run ---")
 
     # 2. Get inputs
     # We use mock inputs for this test
@@ -67,15 +68,15 @@ if __name__ == "__main__":
     # Using .invoke() for the final result:
     final_state = app.invoke(graph_input)
     
-    print("--- Workflow run finished ---")
+    default_logger.info("--- Workflow run finished ---")
     
     # 4. Get the final output
     final_output_model: FinalExtractionOutput = final_state.get("final_output")
     
     if final_output_model:
         # .model_dump_json() is the Pydantic v2 way
-        print(final_output_model.model_dump_json(indent=2))
+        default_logger.info(final_output_model.model_dump_json(indent=2))
     else:
-        print("Error: Graph finished in an unexpected state.")
-        print(json.dumps(final_state, indent=2, default=str))
+        default_logger.info("Error: Graph finished in an unexpected state.")
+        default_logger.info(json.dumps(final_state, indent=2, default=str))
 
