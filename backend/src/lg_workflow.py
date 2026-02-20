@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, TypedDict
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, END, MessagesState
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
 from src.models import TaskResult, FinalExtractionOutput, ExtractionTask
 from src.prompts_lg import get_extraction_prompt, get_validation_prompt
 
@@ -19,17 +19,20 @@ from src.utils.logging_config import default_logger
 
 # --- Load Environment & LLM ---
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-if not GEMINI_API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in environment variables.")
+# Get Vertex AI configuration from environment
+GOOGLE_CLOUD_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT")
+GOOGLE_CLOUD_LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 
-# Initialize Gemini 2.5 Flash
-llm = ChatGoogleGenerativeAI(
+if not GOOGLE_CLOUD_PROJECT:
+    raise ValueError("GOOGLE_CLOUD_PROJECT not found in environment variables.")
+
+# Initialize Gemini via Vertex AI
+llm = ChatVertexAI(
     model="gemini-2.5-flash", 
-    google_api_key=GEMINI_API_KEY,
+    project=GOOGLE_CLOUD_PROJECT,
+    location=GOOGLE_CLOUD_LOCATION,
     temperature=0,
-    generation_config={"response_mime_type": "application/json"},
 )
 
 # --- State Definition ---

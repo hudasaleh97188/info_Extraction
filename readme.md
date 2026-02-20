@@ -13,14 +13,15 @@ A multi-agent document extraction system using **LangGraph** that allows users t
 - **Backend**: Python + Flask + LangGraph + SQLite (SQLAlchemy)
 - **Frontend**: Node.js + Express + Vanilla JavaScript (Legacy)
 - **OCR**: Nanonets API (with mock fallback)
-- **LLM**: Google Gemini via `langchain_google_genai`
+- **LLM**: Google Gemini via Vertex AI (`langchain-google-vertexai`)
 
 ## 🚀 Setup Instructions
 
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- Google API Key (Gemini)
+- Google Cloud Project with Vertex AI enabled
+- GCP Application Default Credentials (`gcloud auth application-default login`)
 - Nanonets API Key (Optional)
 - `uv` (recommended) or `pip`
 
@@ -53,7 +54,9 @@ pip install -e .[dev]
 **Configure environment variables:**
 Create a `.env` file in the `backend` directory:
 ```env
-GOOGLE_API_KEY=your_gemini_api_key_here
+GOOGLE_CLOUD_PROJECT=your_gcp_project_id
+GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_GENAI_USE_VERTEXAI=True
 # Optional:
 # DATABASE_URL=sqlite:///./extraction.db
 # NANONETS_API_KEY=your_nanonets_key
@@ -64,7 +67,7 @@ Start the backend:
 ```bash
 python main.py
 ```
-Backend runs on: `http://localhost:5000`
+Backend runs on: `http://localhost:5050`
 
 ### 2. Frontend Setup (Legacy)
 
@@ -74,11 +77,11 @@ cd frontend
 npm install
 npm start
 ```
-Frontend runs on: `http://localhost:3000`
+Frontend runs on: `http://localhost:4000`
 
 ## 📖 Usage
 
-1. Open `http://localhost:3000`.
+1. Open `http://localhost:4000`.
 2. Upload a document (PDF or image).
 3. Define extraction tasks (aim, output schema).
 4. Click "Start Extraction" and view results.
@@ -111,7 +114,7 @@ pytest tests/ -v -m performance
 This project uses **DeepEval** to assess the quality, accuracy, and faithfulness of extracted data on real documents.
 
 **Prerequisites**:
-- `GOOGLE_API_KEY` (Gemini)
+- `GOOGLE_CLOUD_PROJECT` and Vertex AI credentials
 - `MISTRAL_API_KEY` (OCR for evaluation)
 - Test images in `frontend/uploads/` (e.g., `Bank-Statement-Template-3-TemplateLab-1.jpg`)
 

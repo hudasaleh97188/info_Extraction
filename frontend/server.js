@@ -6,8 +6,8 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
-const BACKEND_URL = 'http://localhost:5000';
+const PORT = 4000;
+const BACKEND_URL = 'http://localhost:5050';
 
 // Middleware
 app.use(cors());

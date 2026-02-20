@@ -18,3 +18,165 @@
 2025-12-07 17:15:38 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
 2025-12-07 17:15:44 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
 2025-12-29 17:51:55 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
+2026-01-22 11:11:06 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
+2026-01-22 11:12:25 | INFO     | src.utils.logging_config:setup_logger:48 - Logger initialized with level: INFO
+2026-01-22 11:49:36 | INFO     | src.lg_workflow:prepare_document_node:72 - --- (Node) prepare_document ---
+2026-01-22 11:49:36 | INFO     | src.lg_workflow:prepare_document_node:85 - ✅ Validated 2 tasks.
+2026-01-22 11:49:36 | INFO     | src.lg_workflow:prepare_document_node:88 -  ATTEMPTING OCR (Mistral)...
+2026-01-22 11:49:36 | INFO     | src.lg_helpers:perform_mistral_ocr:71 - Attempting Mistral OCR for 1761668198294-BankStatementChequing.png via chat.complete...
+2026-01-22 11:49:52 | INFO     | src.lg_helpers:perform_mistral_ocr:134 - ✅ Mistral OCR successful.
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:prepare_document_node:95 - 📄 Document Ready (Markdown Length: 2395 chars).
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Account Statement extraction
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 11:49:52 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 11:49:58 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 11:49:58 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 11:49:58 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Account Statement extraction' complete.
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract the person details
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 11:50:01 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 11:50:02 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 11:50:02 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 11:50:02 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract the person details' complete.
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:task_dispatcher_node:123 - ✅ All tasks processed.
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:finalize_graph_node:268 - --- (Node) finalize_graph ---
+2026-01-22 11:50:04 | INFO     | src.lg_workflow:finalize_graph_node:277 - ✅ Graph run complete.
+2026-01-22 11:51:11 | INFO     | src.lg_workflow:prepare_document_node:72 - --- (Node) prepare_document ---
+2026-01-22 11:51:11 | INFO     | src.lg_workflow:prepare_document_node:85 - ✅ Validated 2 tasks.
+2026-01-22 11:51:11 | INFO     | src.lg_workflow:prepare_document_node:88 -  ATTEMPTING OCR (Mistral)...
+2026-01-22 11:51:11 | INFO     | src.lg_helpers:perform_mistral_ocr:71 - Attempting Mistral OCR for 1761668198294-BankStatementChequing.png via chat.complete...
+2026-01-22 11:51:22 | INFO     | src.lg_helpers:perform_mistral_ocr:134 - ✅ Mistral OCR successful.
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:prepare_document_node:95 - 📄 Document Ready (Markdown Length: 2342 chars).
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Account Statement extraction
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 11:51:23 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 11:51:39 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 11:51:39 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 11:51:39 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Account Statement extraction' complete.
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract the person details
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 11:51:46 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 11:51:47 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 11:51:47 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 11:51:47 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract the person details' complete.
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:task_dispatcher_node:123 - ✅ All tasks processed.
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:finalize_graph_node:268 - --- (Node) finalize_graph ---
+2026-01-22 11:51:49 | INFO     | src.lg_workflow:finalize_graph_node:277 - ✅ Graph run complete.
+2026-01-22 13:15:09 | INFO     | src.lg_workflow:prepare_document_node:72 - --- (Node) prepare_document ---
+2026-01-22 13:15:09 | INFO     | src.lg_workflow:prepare_document_node:85 - ✅ Validated 2 tasks.
+2026-01-22 13:15:09 | INFO     | src.lg_workflow:prepare_document_node:88 -  ATTEMPTING OCR (Mistral)...
+2026-01-22 13:15:09 | INFO     | src.lg_helpers:perform_mistral_ocr:71 - Attempting Mistral OCR for 1761668198294-BankStatementChequing.png via chat.complete...
+2026-01-22 13:15:16 | INFO     | src.lg_helpers:perform_mistral_ocr:134 - ✅ Mistral OCR successful.
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:prepare_document_node:95 - 📄 Document Ready (Markdown Length: 2395 chars).
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract transaction details
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 13:15:16 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 13:15:32 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 13:15:32 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 13:15:32 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract transaction details' complete.
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract person details
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 13:15:40 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 13:15:42 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 13:15:42 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 13:15:42 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract person details' complete.
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:task_dispatcher_node:123 - ✅ All tasks processed.
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:finalize_graph_node:268 - --- (Node) finalize_graph ---
+2026-01-22 13:15:45 | INFO     | src.lg_workflow:finalize_graph_node:277 - ✅ Graph run complete.
+2026-01-22 13:18:13 | INFO     | src.lg_workflow:prepare_document_node:72 - --- (Node) prepare_document ---
+2026-01-22 13:18:13 | INFO     | src.lg_workflow:prepare_document_node:85 - ✅ Validated 2 tasks.
+2026-01-22 13:18:13 | INFO     | src.lg_workflow:prepare_document_node:88 -  ATTEMPTING OCR (Mistral)...
+2026-01-22 13:18:13 | INFO     | src.lg_helpers:perform_mistral_ocr:71 - Attempting Mistral OCR for 1761668198294-BankStatementChequing.png via chat.complete...
+2026-01-22 13:18:20 | INFO     | src.lg_helpers:perform_mistral_ocr:134 - ✅ Mistral OCR successful.
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:prepare_document_node:95 - 📄 Document Ready (Markdown Length: 2415 chars).
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract transaction details
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 13:18:20 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 13:18:44 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 13:18:44 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 13:18:44 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract transaction details' complete.
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract person details
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 13:18:54 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 13:18:56 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 13:18:56 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 13:18:56 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract person details' complete.
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:task_dispatcher_node:123 - ✅ All tasks processed.
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:finalize_graph_node:268 - --- (Node) finalize_graph ---
+2026-01-22 13:18:59 | INFO     | src.lg_workflow:finalize_graph_node:277 - ✅ Graph run complete.
+2026-01-22 16:39:04 | INFO     | src.lg_workflow:prepare_document_node:72 - --- (Node) prepare_document ---
+2026-01-22 16:39:04 | INFO     | src.lg_workflow:prepare_document_node:85 - ✅ Validated 2 tasks.
+2026-01-22 16:39:04 | INFO     | src.lg_workflow:prepare_document_node:88 -  ATTEMPTING OCR (Mistral)...
+2026-01-22 16:39:04 | INFO     | src.lg_helpers:perform_mistral_ocr:71 - Attempting Mistral OCR for 1761668198294-BankStatementChequing.png via chat.complete...
+2026-01-22 16:39:11 | INFO     | src.lg_helpers:perform_mistral_ocr:134 - ✅ Mistral OCR successful.
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:prepare_document_node:95 - 📄 Document Ready (Markdown Length: 2358 chars).
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract transaction details
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 16:39:11 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 16:39:37 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 16:39:37 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 16:39:37 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract transaction details' complete.
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:task_dispatcher_node:127 - 🔹 Dispatching task: Extract person details
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:analyze_schema_node:140 - --- (Node) analyze_schema ---
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:analyze_schema_node:156 - ✅ Schema analysis complete.
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:extract_data_node:176 - --- (Node) extract_data ---
+2026-01-22 16:39:45 | INFO     | src.lg_workflow:extract_data_node:187 - ... Sending extraction prompt to LLM...
+2026-01-22 16:39:47 | INFO     | src.lg_workflow:extract_data_node:192 - ✅ LLM returned raw extraction.
+2026-01-22 16:39:47 | INFO     | src.lg_workflow:validate_data_node:216 - --- (Node) validate_data ---
+2026-01-22 16:39:47 | INFO     | src.lg_workflow:validate_data_node:229 - ... Sending validation prompt to LLM...
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:validate_data_node:234 - ✅ LLM returned cleaned JSON string.
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:validate_data_node:245 - ✅ Task 'Extract person details' complete.
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:task_dispatcher_node:119 - --- (Node) task_dispatcher ---
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:task_dispatcher_node:123 - ✅ All tasks processed.
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:finalize_graph_node:268 - --- (Node) finalize_graph ---
+2026-01-22 16:39:50 | INFO     | src.lg_workflow:finalize_graph_node:277 - ✅ Graph run complete.
